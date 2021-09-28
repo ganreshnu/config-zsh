@@ -1,0 +1,41 @@
+# completion system
+zmodload zsh/complist
+autoload -U compinit; compinit -d "$XDG_CACHE_HOME/.zcompdump"
+
+# enable colors in completions
+eval "$(dircolors)"
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+
+# case insensitive matching
+zstyle ':completion:*' matcher-list '' 'm:{a-z}={A-Z}' 'm:{a-zA-Z}={A-Za-z}' 'r:|[._-]=* r:|=* l:|=*'
+
+# program specific completions
+zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#)*=0=01;31'
+zstyle ':completion:*:kill:*' command 'ps -u $USER -o pid,%cpu,tty,cputime,cmd'
+
+# enable the completion menu
+zstyle ':completion:*' menu select
+# vim keys in completion menu
+bindkey -M menuselect 'h' vi-backward-char
+bindkey -M menuselect 'k' vi-up-line-or-history
+bindkey -M menuselect 'l' vi-forward-char
+bindkey -M menuselect 'j' vi-down-line-or-history
+
+# history
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE="$XDG_STATE_HOME/zsh_history"
+
+setopt hist_ignore_all_dups # remove older duplicate entries from history
+setopt hist_reduce_blanks # remove superfluous blanks from history items
+setopt inc_append_history # save history entries as soon as they are entered
+setopt share_history # share history between different instances of the shell
+
+# prompt
+autoload -U promptinit; promptinit
+PS1="%~ %# "
+
+# use editor to edit command line
+autoload edit-command-line; zle -N edit-command-line
+bindkey -M viins '^e' edit-command-line
+
