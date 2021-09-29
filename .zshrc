@@ -3,7 +3,7 @@ zmodload zsh/complist
 autoload -U compinit; compinit -d "$XDG_CACHE_HOME/.zcompdump"
 
 # enable colors in completions
-eval "$(dircolors)"
+eval "$(TERM=xterm dircolors)"
 zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
 
 # case insensitive matching
