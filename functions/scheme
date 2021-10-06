@@ -1,0 +1,79 @@
+#!/usr/bin/env zsh
+
+scheme() {
+	zparseopts -E -D -- \
+		g=o_g \
+		h=o_h
+
+	if [[ -n $o_h ]] || [[ -z "$1" ]]; then
+		cat <<EOD
+scheme - Modifies the terminal emulator colors using a base64 theme.
+
+Usage: scheme [-g] scheme_name
+
+Arguments:
+  -g		Set scheme globally passing escape values through tmux.
+EOD
+		return 1
+	fi
+
+	local scheme_file="$(dirname $functions_source[$0])/../schemes/$1.json"
+
+	if ! [[ -r $scheme_file ]]; then
+		echo "theme $1 could not be found"
+		return 1
+	fi
+
+	local pyline=$(printf '
+import sys, json
+with open("%s", "r") as read_file:
+	data = json.load(read_file)
+	colors = data["color"]
+	colors.append(data["foreground"])
+	colors.append(data["background"])
+	print(" ".join(colors))
+	' $scheme_file)
+
+	local colors=( $(python3 -c $pyline) )
+
+	local tmux_wrapper='\ePtmux;\e%s\e\\\e\\'
+	emit() {
+		if [[ -v TMUX ]] && [[ -n "$o_g" ]]; then
+			printf $tmux_wrapper $1
+		else
+			printf "$1\\\\"
+		fi
+	}
+
+	for i in $(seq 16); do
+		local hex=$colors[$i]
+		local red=$(printf "%.0f" $(( 0x${hex:1:2} / 255.0 * 1000.0 )) )
+		local green=$(printf "%.0f" $(( 0x${hex:3:2} / 255.0 * 1000.0 )) )
+		local blue=$(printf "%.0f" $(( 0x${hex:5:2} / 255.0 * 1000.0 )) )
+		tput initc $(($i - 1)) $red $green $blue
+		#emit $(printf '\e]4;%d;%s\e' $(($i - 1)) $colors[$i])
+	done
+
+# Manipulate special colors.
+# 10 = foreground, 11 = background, 12 = cursor foregound
+# 13 = mouse foreground, 708 = terminal border background
+# \e]{index};{color}\e
+
+	# Change the terminal foreground
+	#emit $(print '\e]10;white\e')
+	emit $(printf '\e]10;%s\e' $colors[17])
+
+	# Change the terminal background
+	#emit $(print '\e]11;black\e')
+	emit $(printf '\e]11;%s\e' $colors[18])
+
+	# Change the terminal cursor
+	emit $(printf '\e]12;7\e')
+	
+	# Change the terminal border background
+	emit $(printf '\e]708;%s\e' $colors[18])
+
+	export SCHEME=$colors
+}
+
+scheme "$@"

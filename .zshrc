@@ -36,8 +36,10 @@ autoload -U promptinit; promptinit
 PS1="%~ %# "
 
 # use editor to edit command line
-autoload edit-command-line; zle -N edit-command-line
+autoload -U edit-command-line; zle -N edit-command-line
 bindkey -M viins '^e' edit-command-line
+
+autoload -U scheme
 
 alias ls='ls --color=auto'
 #alias dir='dir --color=auto'
