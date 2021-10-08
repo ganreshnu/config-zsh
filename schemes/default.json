@@ -1,0 +1,24 @@
+{
+	  "name": "default",
+		"author": "John Waller",
+		"color": [
+			"#151515",
+			"#aa0000",
+			"#00aa00",
+			"#aaaa00",
+			"#0000aa",
+			"#aa00aa",
+			"#00aaaa",
+			"#aaaaaa",
+			"#858585",
+			"#ff0000",
+			"#00ff00",
+			"#ffff00",
+			"#0000ff",
+			"#ff00ff",
+			"#00ffff",
+			"#e8e8e8"
+		],
+		"foreground": "#ffffff",
+		"background": "#000000"
+}
