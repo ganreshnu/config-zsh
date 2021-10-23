@@ -36,12 +36,12 @@ with open("%s", "r") as read_file:
 
 	local colors=( $(python3 -c $pyline) )
 
-	local tmux_wrapper='\ePtmux;\e%s\e\\\e\\'
+	local tmux_wrapper='\ePtmux;\e%s\e\\'
 	emit() {
 		if [[ -v TMUX ]] && [[ -n "$o_g" ]]; then
-			printf $tmux_wrapper $1
+			printf "$tmux_wrapper" "$1"
 		else
-			printf "$1\\\\"
+			printf "$1"
 		fi
 	}
 
@@ -51,9 +51,16 @@ with open("%s", "r") as read_file:
 		local green=$(printf "%.0f" $(( 0x${hex:3:2} / 255.0 * 1000.0 )) )
 		local blue=$(printf "%.0f" $(( 0x${hex:5:2} / 255.0 * 1000.0 )) )
 		tput initc $(($i - 1)) $red $green $blue
-		#emit $(printf '\e]4;%d;%s\e' $(($i - 1)) $colors[$i])
+		emit $(tput initc $(($i - 1)) $red $green $blue)
 	done
 
+	if [[ -v TMUX ]] && [[ -z "$o_g" ]]; then
+		tmux select-pane -P "bg=$colors[18],fg=$colors[17]"
+	else
+		emit $(printf '\e]10;%s\e\\' $colors[17])
+		emit $(printf '\e]11;%s\e\\' $colors[18])
+		emit $(printf '\e]708;%s\e\\' $colors[18])
+	fi
 # Manipulate special colors.
 # 10 = foreground, 11 = background, 12 = cursor foregound
 # 13 = mouse foreground, 708 = terminal border background
@@ -61,17 +68,17 @@ with open("%s", "r") as read_file:
 
 	# Change the terminal foreground
 	#emit $(print '\e]10;white\e')
-	emit $(printf '\e]10;%s\e' $colors[17])
+	#emit $(printf '\e]10;%s\e' $colors[17])
 
 	# Change the terminal background
 	#emit $(print '\e]11;black\e')
-	emit $(printf '\e]11;%s\e' $colors[18])
+	#emit $(printf '\e]11;%s\e' $colors[18])
 
 	# Change the terminal cursor
-	emit $(printf '\e]12;7\e')
+	#emit $(printf '\e]12;7\e')
 	
 	# Change the terminal border background
-	emit $(printf '\e]708;%s\e' $colors[18])
+	#emit $(printf '\e]708;%s\e' $colors[18])
 
 	export SCHEME=$colors
 }
