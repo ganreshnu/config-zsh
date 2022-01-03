@@ -60,4 +60,11 @@ alias l='ls -CF'
 export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
 export GPG_TTY=$(tty)
 
-
+gpg-ssh-id() {
+	if [[ -n "$1" ]]; then
+		local keygrip=$(gpg --with-keygrip --list-key $1 | awk '/Keygrip = /{ if (lastline ~ /^sub.+\[.*A.*\]/) { print $3 } } { lastline = $0 }')
+	fi
+	if [[ -n "$keygrip" ]]; then
+		echo $keygrip > $HOME/.gnupg/sshcontrol
+	fi
+}
