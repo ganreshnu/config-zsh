@@ -41,6 +41,20 @@ bindkey -M viins '^e' edit-command-line
 
 autoload -U scheme
 
+
+# gpg-agent
+export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
+export GPG_TTY=$(tty)
+
+gpg-ssh-id() {
+	if [[ -n "$1" ]]; then
+		local keygrip=$(gpg --with-keygrip --list-key $1 | awk '/Keygrip = /{ if (lastline ~ /^sub.+\[.*A.*\]/) { print $3 } } { lastline = $0 }')
+	fi
+	if [[ -n "$keygrip" ]]; then
+		echo $keygrip > $HOME/.gnupg/sshcontrol
+	fi
+}
+
 alias ls='ls --color=auto'
 #alias dir='dir --color=auto'
 #alias vdir='vdir --color=auto'
@@ -54,17 +68,5 @@ alias ll='ls -alF'
 alias la='ls -A'
 alias l='ls -CF'
 
+alias tmux="tmux -f $HOME/.config/tmux/tmux.conf"
 
-# gpg-agent
-#unset SSH_AGENT_PID
-export SSH_AUTH_SOCK="$(gpgconf --list-dirs agent-ssh-socket)"
-export GPG_TTY=$(tty)
-
-gpg-ssh-id() {
-	if [[ -n "$1" ]]; then
-		local keygrip=$(gpg --with-keygrip --list-key $1 | awk '/Keygrip = /{ if (lastline ~ /^sub.+\[.*A.*\]/) { print $3 } } { lastline = $0 }')
-	fi
-	if [[ -n "$keygrip" ]]; then
-		echo $keygrip > $HOME/.gnupg/sshcontrol
-	fi
-}
